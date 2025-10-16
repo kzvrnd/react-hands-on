@@ -10,37 +10,59 @@
     <script src="https://unpkg.com/supersimpledev/react-dom.js"></script>
 
     <script src="https://unpkg.com/supersimpledev/babel.js"></script>
-    <script type="text/babel">
-      function ChatInput() {
 
+    <script src="https://unpkg.com/supersimpledev/chatbot.js"></script>
+
+    <script type="text/babel">
+      function ChatInput({ chatMessages, setChatMessages }) {
+        const [inputText, setInputText] = React.useState('');
+
+
+        function saveInputText(event) {          
+          setInputText(event.target.value);
+        }
+
+        function sendMessage() {
+
+          const newChatMessages = [
+            ...chatMessages,
+            {
+              message: inputText,
+              sender: 'user',
+              id: crypto.randomUUID()
+            }
+          ]
+
+          setChatMessages(newChatMessages);
+
+          const response = Chatbot.getResponse(inputText);
+          setChatMessages([
+            ...newChatMessages,
+            {
+              message: response,
+              sender: 'robot',
+              id: crypto.randomUUID()
+            }
+          ]);
+          
+
+          setInputText('');
+        }
+        
         return (
           <>
             <input 
               placeholder="Send a message to Chatbot" 
-              size="30" 
+              size="30"
+              onChange={saveInputText} 
+              value={inputText}
             />
-            <button>Send</button>
+            <button onClick={sendMessage}>Send</button>
           </>
         );
       }
 
       function ChatMessage({ message, sender }) {
-        // desctructuring the parameters of function is an even shorter way to achieve functionality below
-        // ways to destructure the { message, sender}
-        // const message = props.message;
-        // const sender = props.sender;       
-        //const { message, sender } = props;        
-        
-        /*
-        if (sender === 'robot') {
-          return (
-            <div>
-              <img src='robot.png'width="50" />
-              {message}
-            </div>
-          );
-        }
-        */
 
         return (
           <div>
@@ -57,26 +79,71 @@
         
       }
 
+      function ChatMessages({ chatMessages }) {
+
+        // can input {chatMessageComponets} in return or the shot hand version below.
+        /* 
+        const chatMessageComponets = chatMessages.map((chatMessage) => {
+           return (
+              <ChatMessage 
+              message={chatMessage.message}
+              sender={chatMessage.sender}
+              />
+           )
+        });
+        */
+
+        return (
+          <>
+            
+            {chatMessages.map((chatMessage) => {
+            return (
+                <ChatMessage 
+                message={chatMessage.message}
+                sender={chatMessage.sender}
+                key={chatMessage.id}
+                />
+              );
+            })}
+          </>
+        );
+      }
+
       function App() {
+
+          const [chatMessages, setChatMessages] = React.useState([{ 
+          message: 'hello chatbot',
+          sender: 'user',
+          id: 'id1'
+        }, {
+          message: 'Hello! How can I help you?',
+          sender: 'robot',
+          id: 'id2'
+        }, {
+          message: 'can you get me the date',
+          sender: 'user',
+          id: 'id3'
+        }, {
+          message: 'Today is October 15',
+          sender: 'robot',
+          id: 'id4'
+        }
+        ]);
+
+        //const [chatMessages, setChatMessages] = array;
+        // const chatMessages = array[0]
+        // const setChatMessages = array[1];
+
         return (
           <>          
-            <ChatInput />
-            <ChatMessage 
-              message="hello chatbot" 
-              sender="user" 
-            />    
-            <ChatMessage 
-              message="Hello! How can I help you?" 
-              sender="robot" 
-            />      
-            <ChatMessage 
-              message="can you get me the date" 
-              sender="user" 
-            />      
-            <ChatMessage 
-              message="Today is October 15" 
-              sender="robot" 
-            />      
+            <ChatInput
+            chatMessages={chatMessages}
+            setChatMessages={setChatMessages}
+            />
+            <ChatMessages
+            chatMessages={chatMessages}
+            
+            />
           </>
         );
       }
@@ -87,3 +154,4 @@
     </script>
   </body>
 </html>
+
